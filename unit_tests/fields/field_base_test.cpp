@@ -114,6 +114,65 @@ TEST(Field, init_from_input) {
 
 }
 
+string field_simple = R"INPUT(
+{
+   sorption_type="linear",   
+   init_conc=[ 10, 20, 30],    // FieldConst
+   conductivity={ //3x3 tensor
+       TYPE="FieldFormula",
+       value=["x","y", "z"]
+   }
+}
+)INPUT";
+
+
+namespace it = Input::Type;
+TEST(Field, simple) {
+    Profiler::initialize();
+
+    Mesh mesh;
+    FilePath::set_io_dirs(".",UNIT_TESTS_SRC_DIR,"",".");
+    ifstream in(string( FilePath("mesh/simplest_cube.msh", FilePath::input_file) ).c_str());
+    mesh.read_gmsh_from_stream(in);
+
+    Field<3, FieldValue<3>::Scalar > pressure;
+    Field<3, FieldValue<3>::Vector > concentration; // more substances
+
+    init_conc.set_n_comp(4);	// number of substances
+
+    // declare input Record 
+    it::Record main_record =
+            it::Record("main", "desc")
+            .declare_key("pressure", pressure.get_input_type(), it::Default::obligatory(), "desc")
+            .declare_key("concentration", concentration.get_input_type(), it::Default::obligatory(), "desc")
+
+
+    // read input string
+    std::stringstream ss(field_input);
+    Input::JSONToStorage reader;
+    reader.read_stream( ss, main_record );
+    Input::Record in_rec=reader.get_root_interface<Input::Record>();
+
+    // initialize Field instances
+    pressure.set_mesh(&mesh);
+    concentration.set_mesh(&mesh);
+
+    auto r_set = mesh.region_db().get_region_set("BULK");
+    pressure.set_from_input(r_set, in_rec.val<Input::AbstractRecord>("pressure"));
+    concentration.set_from_input(r_set, in_rec.val<Input::AbstractRecord>("concentration"));
+
+    pressure.set_time(0.0);
+    concentration.set_time(0.0);
+
+    // now we can get value in particular point on particular element
+
+    auto ele = mesh.element_accessor(5);
+
+    double pressure_value = pressure.value( ele.centre(), ele );
+    arma::vec conc_value = concentration.value( ele.centre(), ele);
+
+
+}
 
 
 
