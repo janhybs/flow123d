@@ -2,17 +2,18 @@ name: C/C++ CI
 
 on: [push]
 
-
 jobs:
   job_id:
      runs-on: ubuntu-latest
      name: foobar
      steps:
+       - uses: actions/checkout@v1
        - name: configure
+         env:
+           autopull:  0
          run: |
-           env
-           whoami
            ls -la
-           docker --version
-           docker run hello-world
+           bin/fterm exec make -j2
+           ls -la
+           bin/flow123d --version
            
