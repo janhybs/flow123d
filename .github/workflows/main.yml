@@ -15,5 +15,5 @@ jobs:
            ls -la
            bin/fterm --no-term exec make -j2
            ls -la
-           bin/flow123d --version
+           bin/fterm --no-term run --version
            
