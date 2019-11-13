@@ -13,7 +13,7 @@ jobs:
            autopull:  0
          run: |
            ls -la
-           bin/fterm exec make -j2
+           bin/fterm --no-term exec make -j2
            ls -la
            bin/flow123d --version
            
