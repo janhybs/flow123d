@@ -8,9 +8,11 @@ jobs:
      runs-on: ubuntu-latest
      name: foobar
      steps:
-       - name: Checkout
-         uses: actions/checkout@v1
        - name: configure
          run: |
            env
            whoami
+           ls -la
+           docker --version
+           docker run hello-world
+           
